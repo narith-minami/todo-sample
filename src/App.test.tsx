@@ -64,4 +64,23 @@ describe('App', () => {
     // アイテムが削除されたことを確認
     expect(screen.queryByText('買い物に行く')).not.toBeInTheDocument();
   });
+
+  test('新しいTodoアイテムを追加できる', async () => {
+    render(<App />);
+    
+    // タイトルを入力
+    const titleInput = screen.getByLabelText('タイトル');
+    await userEvent.type(titleInput, '新しいタスク');
+    
+    // 優先度を選択
+    const prioritySelect = screen.getByLabelText('優先度');
+    await userEvent.selectOptions(prioritySelect, 'high');
+    
+    // 追加ボタンをクリック
+    const addButton = screen.getByRole('button', { name: '追加' });
+    await userEvent.click(addButton);
+    
+    // 新しいアイテムが追加されたことを確認
+    expect(screen.getByText('新しいタスク')).toBeInTheDocument();
+  });
 }); 
