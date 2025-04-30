@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import TodoItem from './components/TodoItem';
+import TodoForm from './components/TodoForm';
 
 interface Todo {
   id: string;
@@ -46,6 +47,16 @@ function App() {
     setTodos(todos.filter(todo => todo.id !== id));
   };
 
+  const handleAddTodo = (title: string, priority: 'high' | 'medium' | 'low') => {
+    const newTodo: Todo = {
+      id: Date.now().toString(),
+      title,
+      completed: false,
+      priority
+    };
+    setTodos([...todos, newTodo]);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
       <div className="relative py-3 sm:max-w-xl sm:mx-auto">
@@ -54,6 +65,7 @@ function App() {
             <div className="divide-y divide-gray-200">
               <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
                 <h1 className="text-3xl font-bold text-center mb-8">Todo Sample</h1>
+                <TodoForm onSubmit={handleAddTodo} />
                 <div className="space-y-2">
                   {todos.map(todo => (
                     <TodoItem

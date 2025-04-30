@@ -42,9 +42,10 @@ describe('App', () => {
     await userEvent.clear(titleInput);
     await userEvent.type(titleInput, '新しい買い物リスト');
     
-    // 優先度を変更
-    const prioritySelect = screen.getByRole('combobox');
-    await userEvent.selectOptions(prioritySelect, 'medium');
+    // 優先度を変更（編集モードのselect要素を取得）
+    const prioritySelects = screen.getAllByRole('combobox');
+    const editModeSelect = prioritySelects[1]; // 編集モードのselect要素
+    await userEvent.selectOptions(editModeSelect, 'medium');
     
     // 保存ボタンをクリック
     const saveButton = screen.getByText('保存');
@@ -63,5 +64,24 @@ describe('App', () => {
     
     // アイテムが削除されたことを確認
     expect(screen.queryByText('買い物に行く')).not.toBeInTheDocument();
+  });
+
+  test('新しいTodoアイテムを追加できる', async () => {
+    render(<App />);
+    
+    // タイトルを入力
+    const titleInput = screen.getByLabelText('タイトル');
+    await userEvent.type(titleInput, '新しいタスク');
+    
+    // 優先度を選択
+    const prioritySelect = screen.getByLabelText('優先度');
+    await userEvent.selectOptions(prioritySelect, 'high');
+    
+    // 追加ボタンをクリック
+    const addButton = screen.getByRole('button', { name: '追加' });
+    await userEvent.click(addButton);
+    
+    // 新しいアイテムが追加されたことを確認
+    expect(screen.getByText('新しいタスク')).toBeInTheDocument();
   });
 }); 
