@@ -42,9 +42,10 @@ describe('App', () => {
     await userEvent.clear(titleInput);
     await userEvent.type(titleInput, '新しい買い物リスト');
     
-    // 優先度を変更
-    const prioritySelect = screen.getByRole('combobox');
-    await userEvent.selectOptions(prioritySelect, 'medium');
+    // 優先度を変更（編集モードのselect要素を取得）
+    const prioritySelects = screen.getAllByRole('combobox');
+    const editModeSelect = prioritySelects[1]; // 編集モードのselect要素
+    await userEvent.selectOptions(editModeSelect, 'medium');
     
     // 保存ボタンをクリック
     const saveButton = screen.getByText('保存');
