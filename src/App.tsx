@@ -30,6 +30,7 @@ function App() {
       priority: 'low'
     }
   ]);
+  const [isPrioritySortEnabled, setIsPrioritySortEnabled] = useState<boolean>(true);
 
   const handleToggleComplete = (id: string) => {
     setTodos(todos.map(todo =>
@@ -63,9 +64,9 @@ function App() {
     low: 2,
   };
 
-  const sortedTodos = [...todos].sort((a, b) => {
-    return priorityOrder[a.priority] - priorityOrder[b.priority];
-  });
+  const todosForRender = isPrioritySortEnabled
+    ? [...todos].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+    : todos;
 
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
@@ -76,8 +77,14 @@ function App() {
               <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
                 <h1 className="text-3xl font-bold text-center mb-8">Todo Sample</h1>
                 <TodoForm onSubmit={handleAddTodo} />
+                <button
+                  onClick={() => setIsPrioritySortEnabled(prev => !prev)}
+                  className="mb-4 mt-4 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                >
+                  {isPrioritySortEnabled ? "優先度ソート中 (追加順に戻す)" : "追加順に表示中 (優先度ソートに戻す)"}
+                </button>
                 <div className="space-y-2">
-                  {sortedTodos.map(todo => (
+                  {todosForRender.map(todo => (
                     <TodoItem
                       key={todo.id}
                       id={todo.id}
