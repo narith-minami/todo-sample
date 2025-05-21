@@ -48,7 +48,12 @@ const TodoItem: React.FC<TodoItemProps> = ({ id, title, completed, priority, onT
         </div>
       ) : (
         <div className="flex-grow">
-          <span className={`mr-2 ${completed ? 'line-through text-gray-500' : ''}`}>{title}</span>
+          <span
+            className={`mr-2 ${completed ? 'line-through text-gray-500' : ''}`}
+            data-testid={`todo-item-title-${id}`}
+          >
+            {title}
+          </span>
           <span className={`text-sm font-semibold ${
             priority === 'high' ? 'text-red-600' : priority === 'medium' ? 'text-yellow-600' : 'text-green-600'
           }`}>{priority === 'high' ? '高' : priority === 'medium' ? '中' : '低'}</span>

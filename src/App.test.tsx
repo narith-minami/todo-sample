@@ -87,27 +87,10 @@ describe('App', () => {
 
   // Helper function to get todo titles in rendered order
   const getRenderedTodoTitles = () => {
-    // This selector attempts to find the span containing the title within each TodoItem.
-    // It looks for a div that is a sibling of the checkbox, then finds a span within it.
-    // This is based on the structure observed in TodoItem.tsx.
-    // A more robust way would be to add data-testid attributes to the title spans.
-    const todoElements = screen.queryAllByRole('listitem'); // Assuming TodoItems are list items
-    if (todoElements.length > 0) {
-        return todoElements.map(item => {
-            const titleElement = item.querySelector('span:not([class*="text-sm"])'); // Attempt to get the title span
-            return titleElement ? titleElement.textContent || '' : '';
-        });
-    }
-    // Fallback strategy if listitem role is not used, try to get by known text then map their current order.
-    // This is less ideal as it relies on knowing the titles.
-    // For dynamic tests, a better way is to ensure TodoItem has a consistent testable structure.
-    // The example's regex approach is good for a fixed set of initial items.
-    // For these tests, we'll identify items based on the div structure in TodoItem
-    const allTodoItemDivs = Array.from(document.querySelectorAll('.flex.items-center.justify-between.p-2.border-b'));
-    return allTodoItemDivs.map(div => {
-      const titleSpan = div.querySelector('div.flex-grow > span:first-child');
-      return titleSpan ? titleSpan.textContent : '';
-    }).filter(title => title !== null && title !== ''); // Filter out any null or empty strings
+    // Use screen.queryAllByTestId to find all title spans.
+    // The regex matches any data-testid that starts with "todo-item-title-".
+    const titleSpans = screen.queryAllByTestId(/^todo-item-title-/i);
+    return titleSpans.map(span => span.textContent || '').filter(title => title !== '');
   };
 
 
