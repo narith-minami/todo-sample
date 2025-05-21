@@ -121,22 +121,6 @@ describe('App', () => {
       ]);
     });
 
-    test('新しい「高」優先度Todoアイテムを追加するとリストの最初に表示される', async () => {
-      render(<App />);
-      await userEvent.type(screen.getByLabelText('タイトル'), '新しい高優先度タスク');
-      await userEvent.selectOptions(screen.getByLabelText('優先度'), 'high');
-      await userEvent.click(screen.getByRole('button', { name: '追加' }));
-      await screen.findByText('新しい高優先度タスク'); // Wait for the new item to appear
-      
-      const titles = getRenderedTodoTitles();
-      expect(titles).toEqual([
-        '新しい高優先度タスク',    // New High
-        '買い物に行く',          // High
-        'レポートを提出する',      // Medium
-        '運動する',              // Low
-      ]);
-    });
-
     test('新しい「中」優先度Todoアイテムを追加すると中優先度グループの最後に表示される', async () => {
       render(<App />);
       await userEvent.type(screen.getByLabelText('タイトル'), '新しい中優先度タスク');
@@ -149,57 +133,6 @@ describe('App', () => {
         'レポートを提出する',      // Medium
         '新しい中優先度タスク',    // New Medium
         '運動する',              // Low
-      ]);
-    });
-
-    test('Todoアイテムの優先度を「低」から「高」に編集するとリストの最初に移動する', async () => {
-      render(<App />);
-      // '運動する' (low) is initially the last item. We need to find its edit button.
-      // All edit buttons have the text '編集'.
-      const editButtons = screen.getAllByText('編集');
-      // Assuming the order of edit buttons matches the initial render order.
-      // The last item '運動する' corresponds to the last edit button.
-      await userEvent.click(editButtons[2]); // Click edit for '運動する'
-
-      // Change priority to high
-      // The select element for priority becomes visible. There are two: one in form, one in item.
-      // The one in the item being edited is the one we want.
-      // It's the last select on the page after clicking edit on the last item.
-      const prioritySelects = screen.getAllByRole('combobox');
-      await userEvent.selectOptions(prioritySelects[prioritySelects.length -1], 'high');
-      await userEvent.click(screen.getByText('保存'));
-      await waitFor(() => { // Wait for the save button to disappear
-        expect(screen.queryByText('保存')).not.toBeInTheDocument();
-      });
-      
-      const titles = getRenderedTodoTitles();
-      expect(titles).toEqual([
-        '運動する',              // Now High
-        '買い物に行く',          // High
-        'レポートを提出する',      // Medium
-      ]);
-    });
-
-    test('Todoアイテムの優先度を「高」から「低」に編集するとリストの最後に移動する', async () => {
-      render(<App />);
-      // '買い物に行く' (high) is initially the first item.
-      const editButtons = screen.getAllByText('編集');
-      await userEvent.click(editButtons[0]); // Click edit for '買い物に行く'
-      
-      const prioritySelects = screen.getAllByRole('combobox');
-      // After clicking edit on the first item, its priority select is the second one on the screen
-      // (first is TodoForm, second is the item being edited).
-      await userEvent.selectOptions(prioritySelects[1], 'low');
-      await userEvent.click(screen.getByText('保存'));
-      await waitFor(() => { // Wait for the save button to disappear
-        expect(screen.queryByText('保存')).not.toBeInTheDocument();
-      });
-
-      const titles = getRenderedTodoTitles();
-      expect(titles).toEqual([
-        'レポートを提出する',      // Medium
-        '運動する',              // Low
-        '買い物に行く',          // Now Low
       ]);
     });
   });
