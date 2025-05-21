@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
@@ -143,6 +143,7 @@ describe('App', () => {
       await userEvent.type(screen.getByLabelText('タイトル'), '新しい高優先度タスク');
       await userEvent.selectOptions(screen.getByLabelText('優先度'), 'high');
       await userEvent.click(screen.getByRole('button', { name: '追加' }));
+      await screen.findByText('新しい高優先度タスク'); // Wait for the new item to appear
       
       const titles = getRenderedTodoTitles();
       expect(titles).toEqual([
@@ -184,6 +185,9 @@ describe('App', () => {
       const prioritySelects = screen.getAllByRole('combobox');
       await userEvent.selectOptions(prioritySelects[prioritySelects.length -1], 'high');
       await userEvent.click(screen.getByText('保存'));
+      await waitFor(() => { // Wait for the save button to disappear
+        expect(screen.queryByText('保存')).not.toBeInTheDocument();
+      });
       
       const titles = getRenderedTodoTitles();
       expect(titles).toEqual([
@@ -204,6 +208,9 @@ describe('App', () => {
       // (first is TodoForm, second is the item being edited).
       await userEvent.selectOptions(prioritySelects[1], 'low');
       await userEvent.click(screen.getByText('保存'));
+      await waitFor(() => { // Wait for the save button to disappear
+        expect(screen.queryByText('保存')).not.toBeInTheDocument();
+      });
 
       const titles = getRenderedTodoTitles();
       expect(titles).toEqual([
