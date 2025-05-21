@@ -57,6 +57,16 @@ function App() {
     setTodos([...todos, newTodo]);
   };
 
+  const priorityOrder = {
+    high: 0,
+    medium: 1,
+    low: 2,
+  };
+
+  const sortedTodos = [...todos].sort((a, b) => {
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
       <div className="relative py-3 sm:max-w-xl sm:mx-auto">
@@ -67,7 +77,7 @@ function App() {
                 <h1 className="text-3xl font-bold text-center mb-8">Todo Sample</h1>
                 <TodoForm onSubmit={handleAddTodo} />
                 <div className="space-y-2">
-                  {todos.map(todo => (
+                  {sortedTodos.map(todo => (
                     <TodoItem
                       key={todo.id}
                       id={todo.id}
