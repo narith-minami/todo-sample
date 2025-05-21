@@ -84,4 +84,56 @@ describe('App', () => {
     // 新しいアイテムが追加されたことを確認
     expect(screen.getByText('新しいタスク')).toBeInTheDocument();
   });
+
+  // Helper function to get todo titles in rendered order
+  const getRenderedTodoTitles = () => {
+    // Use screen.queryAllByTestId to find all title spans.
+    // The regex matches any data-testid that starts with "todo-item-title-".
+    const titleSpans = screen.queryAllByTestId(/^todo-item-title-/i);
+    return titleSpans.map(span => span.textContent || '').filter(title => title !== '');
+  };
+
+
+  describe('Todo Priority Sorting', () => {
+    test('初期状態でTodoアイテムが優先度順に表示される', () => {
+      render(<App />);
+      const titles = getRenderedTodoTitles();
+      // Default items: '買い物に行く' (high), 'レポートを提出する' (medium), '運動する' (low)
+      expect(titles).toEqual([
+        '買い物に行く',
+        'レポートを提出する',
+        '運動する',
+      ]);
+    });
+
+    test('新しい「低」優先度Todoアイテムを追加するとリストの最後に表示される', async () => {
+      render(<App />);
+      await userEvent.type(screen.getByLabelText('タイトル'), '新しい低優先度タスク');
+      await userEvent.selectOptions(screen.getByLabelText('優先度'), 'low');
+      await userEvent.click(screen.getByRole('button', { name: '追加' }));
+
+      const titles = getRenderedTodoTitles();
+      expect(titles).toEqual([
+        '買い物に行く',          // High
+        'レポートを提出する',      // Medium
+        '運動する',              // Low
+        '新しい低優先度タスク',    // New Low
+      ]);
+    });
+
+    test('新しい「中」優先度Todoアイテムを追加すると中優先度グループの最後に表示される', async () => {
+      render(<App />);
+      await userEvent.type(screen.getByLabelText('タイトル'), '新しい中優先度タスク');
+      await userEvent.selectOptions(screen.getByLabelText('優先度'), 'medium');
+      await userEvent.click(screen.getByRole('button', { name: '追加' }));
+
+      const titles = getRenderedTodoTitles();
+      expect(titles).toEqual([
+        '買い物に行く',          // High
+        'レポートを提出する',      // Medium
+        '新しい中優先度タスク',    // New Medium
+        '運動する',              // Low
+      ]);
+    });
+  });
 }); 
