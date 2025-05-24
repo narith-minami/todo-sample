@@ -136,4 +136,55 @@ describe('App', () => {
       ]);
     });
   });
+
+  test('Todoアイテムにコメントを追加できる', async () => {
+    render(<App />);
+
+    // Find the first TodoItem. We'll target "買い物に行く"
+    // The TodoItem component itself doesn't have a specific testID, but its title does.
+    // We need to find the comment input related to this specific TodoItem.
+    // A robust way is to find the TodoItem container by its title, then query within it.
+    // Let's assume the structure: TodoItem contains title, then later comment input.
+    // We can find all comment input fields and assume the first one corresponds to the first Todo item.
+    // Or better, find the parent element of the todo title "買い物に行く", then search within that parent.
+
+    const todoItemTitle = screen.getByText('買い物に行く');
+    // Assuming the TodoItem structure is a div that contains the title and then the comment section.
+    // This might be fragile if the structure changes significantly.
+    // A more robust way would be to add a test-id to the TodoItem's root div.
+    // For now, let's try to find the comment input associated with "買い物に行く".
+    // The comment input fields are <input type="text" placeholder="Add a comment..." />
+    // And the add buttons are <button>Add</button>
+
+    // Get all comment input fields
+    const commentInputs = screen.getAllByPlaceholderText('Add a comment...');
+    // Get all "Add" buttons for comments
+    const addCommentButtons = screen.getAllByRole('button', { name: 'Add' });
+
+    // Assuming the first TodoItem ("買い物に行く") corresponds to the first comment input and button
+    const firstCommentInput = commentInputs[0];
+    const firstAddCommentButton = addCommentButtons[0];
+
+    // Type a new comment
+    await userEvent.type(firstCommentInput, '新しいコメント');
+    // Click the add button
+    await userEvent.click(firstAddCommentButton);
+
+    // Verify the new comment is displayed.
+    // The comment text "新しいコメント" should be present.
+    // We also expect the timestamp to be there, but checking for text is simpler.
+    expect(screen.getByText('新しいコメント')).toBeInTheDocument();
+
+    // Optional: Verify that the input is cleared (though this is more of a TodoItem unit test concern)
+    expect(firstCommentInput).toHaveValue('');
+
+
+    // Add another comment to the same item to ensure multiple comments are handled
+    await userEvent.type(firstCommentInput, '２番目のコメント');
+    await userEvent.click(firstAddCommentButton);
+    expect(screen.getByText('２番目のコメント')).toBeInTheDocument();
+
+    // Check if the first comment is still there
+    expect(screen.getByText('新しいコメント')).toBeInTheDocument();
+  });
 }); 

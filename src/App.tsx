@@ -7,6 +7,13 @@ interface Todo {
   title: string;
   completed: boolean;
   priority: 'high' | 'medium' | 'low';
+  comments?: Comment[];
+}
+
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: string;
 }
 
 function App() {
@@ -15,22 +22,39 @@ function App() {
       id: '1',
       title: '買い物に行く',
       completed: false,
-      priority: 'high'
+      priority: 'high',
+      comments: []
     },
     {
       id: '2',
       title: 'レポートを提出する',
       completed: false,
-      priority: 'medium'
+      priority: 'medium',
+      comments: []
     },
     {
       id: '3',
       title: '運動する',
       completed: true,
-      priority: 'low'
+      priority: 'low',
+      comments: []
     }
   ]);
   const [isPrioritySortEnabled, setIsPrioritySortEnabled] = useState<boolean>(true);
+
+  const handleAddComment = (todoId: string, commentText: string) => {
+    const newComment: Comment = {
+      id: Date.now().toString(),
+      text: commentText,
+      createdAt: new Date().toISOString(),
+    };
+    setTodos(todos.map(todo =>
+      todo.id === todoId ? {
+        ...todo,
+        comments: [...(todo.comments || []), newComment]
+      } : todo
+    ));
+  };
 
   const handleToggleComplete = (id: string) => {
     setTodos(todos.map(todo =>
@@ -91,9 +115,11 @@ function App() {
                       title={todo.title}
                       completed={todo.completed}
                       priority={todo.priority}
+                      comments={todo.comments || []}
                       onToggleComplete={handleToggleComplete}
                       onEdit={handleEdit}
                       onDelete={handleDelete}
+                      onAddComment={handleAddComment}
                     />
                   ))}
                 </div>
