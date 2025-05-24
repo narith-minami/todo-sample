@@ -148,7 +148,6 @@ describe('App', () => {
     // We can find all comment input fields and assume the first one corresponds to the first Todo item.
     // Or better, find the parent element of the todo title "買い物に行く", then search within that parent.
 
-    const todoItemTitle = screen.getByText('買い物に行く');
     // Assuming the TodoItem structure is a div that contains the title and then the comment section.
     // This might be fragile if the structure changes significantly.
     // A more robust way would be to add a test-id to the TodoItem's root div.
