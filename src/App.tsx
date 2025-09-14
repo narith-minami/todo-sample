@@ -7,6 +7,8 @@ interface Todo {
   title: string;
   completed: boolean;
   priority: 'high' | 'medium' | 'low';
+  category: 'work' | 'personal' | 'shopping';
+  dueDate?: string;
 }
 
 function App() {
@@ -15,22 +17,31 @@ function App() {
       id: '1',
       title: '買い物に行く',
       completed: false,
-      priority: 'high'
+      priority: 'high',
+      category: 'shopping',
+      dueDate: '2025-09-15'
     },
     {
       id: '2',
       title: 'レポートを提出する',
       completed: false,
-      priority: 'medium'
+      priority: 'medium',
+      category: 'work',
+      dueDate: '2025-09-16'
     },
     {
       id: '3',
       title: '運動する',
       completed: true,
-      priority: 'low'
+      priority: 'low',
+      category: 'personal',
+      dueDate: '2025-09-15'
     }
   ]);
-  const [isPrioritySortEnabled, setIsPrioritySortEnabled] = useState<boolean>(true);
+  const [showCompleted, setShowCompleted] = useState<boolean>(true);
+  const [filterPriority, setFilterPriority] = useState<'all' | 'high' | 'medium' | 'low'>('all');
+  const [filterCategory, setFilterCategory] = useState<'all' | 'work' | 'personal' | 'shopping'>('all');
+  const [sortBy, setSortBy] = useState<'priority' | 'dueDate' | 'default'>('priority');
 
   const handleToggleComplete = (id: string) => {
     setTodos(todos.map(todo =>
@@ -38,9 +49,9 @@ function App() {
     ));
   };
 
-  const handleEdit = (id: string, newTitle: string, newPriority: 'high' | 'medium' | 'low') => {
+  const handleEdit = (id: string, newTitle: string, newPriority: 'high' | 'medium' | 'low', newCategory: 'work' | 'personal' | 'shopping', newDueDate?: string) => {
     setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, title: newTitle, priority: newPriority } : todo
+      todo.id === id ? { ...todo, title: newTitle, priority: newPriority, category: newCategory, dueDate: newDueDate } : todo
     ));
   };
 
@@ -48,12 +59,14 @@ function App() {
     setTodos(todos.filter(todo => todo.id !== id));
   };
 
-  const handleAddTodo = (title: string, priority: 'high' | 'medium' | 'low') => {
+  const handleAddTodo = (title: string, priority: 'high' | 'medium' | 'low', category: 'work' | 'personal' | 'shopping', dueDate?: string) => {
     const newTodo: Todo = {
       id: Date.now().toString(),
       title,
       completed: false,
-      priority
+      priority,
+      category,
+      dueDate
     };
     setTodos([...todos, newTodo]);
   };
@@ -64,9 +77,21 @@ function App() {
     low: 2,
   };
 
-  const todosForRender = isPrioritySortEnabled
-    ? [...todos].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
-    : todos;
+  const todosForRender = todos
+    .filter(todo => showCompleted || !todo.completed)
+    .filter(todo => filterPriority === 'all' || todo.priority === filterPriority)
+    .filter(todo => filterCategory === 'all' || todo.category === filterCategory)
+    .sort((a, b) => {
+      if (sortBy === 'priority') {
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      }
+      if (sortBy === 'dueDate') {
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      }
+      return 0; // default order
+    });
 
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
@@ -77,12 +102,34 @@ function App() {
               <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
                 <h1 className="text-3xl font-bold text-center mb-8">Todo Sample</h1>
                 <TodoForm onSubmit={handleAddTodo} />
-                <button
-                  onClick={() => setIsPrioritySortEnabled(prev => !prev)}
-                  className="mb-4 mt-4 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                >
-                  {isPrioritySortEnabled ? "優先度ソート中 (追加順に戻す)" : "追加順に表示中 (優先度ソートに戻す)"}
-                </button>
+                <div className="flex items-center mb-4">
+                  <input
+                    type="checkbox"
+                    checked={showCompleted}
+                    onChange={e => setShowCompleted(e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label>Show Completed</label>
+                </div>
+                <div className="flex space-x-4 mb-4">
+                  <select value={filterPriority} onChange={e => setFilterPriority(e.target.value as any)} className="p-2 border rounded">
+                    <option value="all">All Priorities</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                  <select value={filterCategory} onChange={e => setFilterCategory(e.target.value as any)} className="p-2 border rounded">
+                    <option value="all">All Categories</option>
+                    <option value="work">Work</option>
+                    <option value="personal">Personal</option>
+                    <option value="shopping">Shopping</option>
+                  </select>
+                  <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="p-2 border rounded">
+                    <option value="default">Default</option>
+                    <option value="priority">Sort by Priority</option>
+                    <option value="dueDate">Sort by Due Date</option>
+                  </select>
+                </div>
                 <div className="space-y-2">
                   {todosForRender.map(todo => (
                     <TodoItem
@@ -91,6 +138,8 @@ function App() {
                       title={todo.title}
                       completed={todo.completed}
                       priority={todo.priority}
+                      category={todo.category}
+                      dueDate={todo.dueDate}
                       onToggleComplete={handleToggleComplete}
                       onEdit={handleEdit}
                       onDelete={handleDelete}

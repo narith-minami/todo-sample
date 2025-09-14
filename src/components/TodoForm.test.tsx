@@ -29,7 +29,7 @@ describe('TodoForm', () => {
     await userEvent.selectOptions(prioritySelect, 'high');
     await userEvent.click(submitButton);
 
-    expect(mockOnSubmit).toHaveBeenCalledWith('新しいタスク', 'high');
+    expect(mockOnSubmit).toHaveBeenCalledWith('新しいタスク', 'high', 'personal', '');
     expect(titleInput).toHaveValue('');
     expect(prioritySelect).toHaveValue('medium');
   });
