@@ -14,7 +14,8 @@ describe('TodoItem', () => {
   const mockHandlers = {
     onToggleComplete: jest.fn(),
     onEdit: jest.fn(),
-    onDelete: jest.fn()
+    onDelete: jest.fn(),
+    onAddComment: jest.fn(), // Added for comment functionality
   };
 
   beforeEach(() => {
@@ -112,5 +113,101 @@ describe('TodoItem', () => {
     await userEvent.click(deleteButton);
 
     expect(mockHandlers.onDelete).toHaveBeenCalledWith('1');
+  });
+
+  describe('Comment Functionality', () => {
+    const mockComments = [
+      { id: 'c1', text: 'First comment', createdAt: new Date(2023, 0, 1, 10, 0, 0).toISOString() },
+      { id: 'c2', text: 'Second comment', createdAt: new Date(2023, 0, 2, 12, 30, 0).toISOString() },
+    ];
+
+    test('displays comments correctly when comments are provided', () => {
+      render(
+        <TodoItem
+          {...mockTodo}
+          {...mockHandlers}
+          comments={mockComments}
+        />
+      );
+
+      expect(screen.getByText('First comment')).toBeInTheDocument();
+      expect(screen.getByText(new Date(mockComments[0].createdAt).toLocaleString())).toBeInTheDocument();
+      expect(screen.getByText('Second comment')).toBeInTheDocument();
+      expect(screen.getByText(new Date(mockComments[1].createdAt).toLocaleString())).toBeInTheDocument();
+      expect(screen.queryByText('No comments yet.')).not.toBeInTheDocument();
+    });
+
+    test('displays "No comments yet." when comments array is empty', () => {
+      render(
+        <TodoItem
+          {...mockTodo}
+          {...mockHandlers}
+          comments={[]}
+        />
+      );
+      expect(screen.getByText('No comments yet.')).toBeInTheDocument();
+    });
+
+    test('displays "No comments yet." when comments prop is undefined', () => {
+      render(
+        <TodoItem
+          {...mockTodo}
+          {...mockHandlers}
+          // comments prop is intentionally omitted
+        />
+      );
+      expect(screen.getByText('No comments yet.')).toBeInTheDocument();
+    });
+
+    test('allows adding a new comment and clears input', async () => {
+      render(
+        <TodoItem
+          {...mockTodo}
+          {...mockHandlers}
+        />
+      );
+
+      const commentInput = screen.getByPlaceholderText('Add a comment...');
+      const addButton = screen.getByRole('button', { name: 'Add' });
+
+      // Type a comment and add it
+      await userEvent.type(commentInput, 'This is a test comment');
+      await userEvent.click(addButton);
+
+      expect(mockHandlers.onAddComment).toHaveBeenCalledWith(mockTodo.id, 'This is a test comment');
+      expect(commentInput).toHaveValue(''); // Input should be cleared
+    });
+
+    test('does not add a comment if input is empty', async () => {
+      render(
+        <TodoItem
+          {...mockTodo}
+          {...mockHandlers}
+        />
+      );
+
+      const addButton = screen.getByRole('button', { name: 'Add' });
+      await userEvent.click(addButton); // Click with empty input
+
+      expect(mockHandlers.onAddComment).not.toHaveBeenCalled();
+    });
+    
+    test('does not add a comment if input is only whitespace', async () => {
+      render(
+        <TodoItem
+          {...mockTodo}
+          {...mockHandlers}
+        />
+      );
+
+      const commentInput = screen.getByPlaceholderText('Add a comment...');
+      const addButton = screen.getByRole('button', { name: 'Add' });
+      
+      await userEvent.type(commentInput, '   '); // Type only spaces
+      await userEvent.click(addButton);
+
+      expect(mockHandlers.onAddComment).not.toHaveBeenCalled();
+      expect(commentInput).toHaveValue('   '); // Input should retain whitespace for user to see
+    });
   });
 }); 
