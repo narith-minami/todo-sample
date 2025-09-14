@@ -7,6 +7,8 @@ interface Todo {
   title: string;
   completed: boolean;
   priority: 'high' | 'medium' | 'low';
+  category: string;
+  dueDate: string; // ISO format
 }
 
 function App() {
@@ -15,7 +17,9 @@ function App() {
       id: '1',
       title: '買い物に行く',
       completed: false,
-      priority: 'high'
+      priority: 'high',
+      category: '生活',
+      dueDate: '2025-09-15'
     },
     {
       id: '2',
