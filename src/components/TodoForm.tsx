@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 
 interface TodoFormProps {
-  onSubmit: (title: string, priority: 'low' | 'medium' | 'high') => void;
+  onSubmit: (title: string, priority: 'low' | 'medium' | 'high', category: 'work' | 'personal' | 'shopping', dueDate?: string) => void;
 }
 
 const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [category, setCategory] = useState<'work' | 'personal' | 'shopping'>('personal');
+  const [dueDate, setDueDate] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim()) {
-      onSubmit(title.trim(), priority);
+      onSubmit(title.trim(), priority, category, dueDate);
       setTitle('');
       setPriority('medium');
+      setCategory('personal');
+      setDueDate('');
     }
   };
 
@@ -47,6 +51,33 @@ const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
           <option value="medium">中</option>
           <option value="high">高</option>
         </select>
+      </div>
+      <div className="mb-4">
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+          カテゴリ
+        </label>
+        <select
+          id="category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value as 'work' | 'personal' | 'shopping')}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="work">仕事</option>
+          <option value="personal">個人</option>
+          <option value="shopping">買い物</option>
+        </select>
+      </div>
+      <div className="mb-4">
+        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
+          期限日
+        </label>
+        <input
+          type="date"
+          id="dueDate"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
       <button
         type="submit"

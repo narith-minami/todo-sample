@@ -8,7 +8,9 @@ describe('TodoItem', () => {
     id: '1',
     title: 'テストタスク',
     completed: false,
-    priority: 'high' as const
+    priority: 'high' as const,
+    category: 'work' as const,
+    dueDate: '2025-09-15'
   };
 
   const mockHandlers = {
@@ -97,7 +99,7 @@ describe('TodoItem', () => {
     const saveButton = screen.getByText('保存');
     await userEvent.click(saveButton);
 
-    expect(mockHandlers.onEdit).toHaveBeenCalledWith('1', '編集されたタスク', 'medium');
+    expect(mockHandlers.onEdit).toHaveBeenCalledWith('1', '編集されたタスク', 'medium', 'work', '2025-09-15');
   });
 
   test('削除が機能する', async () => {
